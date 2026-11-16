@@ -1,0 +1,58 @@
+# Deployment-specific values must be supplied through environment variables or
+# JVM system properties. This file intentionally contains no credentials,
+# account names, server addresses, or database names.
+dashscope:
+  base-url: ${DASHSCOPE_BASE_URL:}
+  api-key: ${DASHSCOPE_API_KEY:}
+  model: ${DASHSCOPE_MODEL:}
+llm:
+  streaming: ${LLM_STREAMING:false}
+  timeout-seconds: ${LLM_TIMEOUT_SECONDS:260}
+  max-retries: ${LLM_MAX_RETRIES:3}
+  system-prompt: ${LLM_SYSTEM_PROMPT:You are a helpful knowledge graph assistant.}
+  # DeepSeek returns reasoning in a separate response field, so it must not
+  # receive Qwen's /no_think prompt marker. Set this to true only when serving
+  # a Qwen-compatible thinking model through the same gateway.
+  disable-thinking: ${LLM_DISABLE_THINKING:false}
+memory:
+  max-messages: ${MEMORY_MAX_MESSAGES:20}
+neo4j:
+  uri: ${NEO4J_URI:}
+  username: ${NEO4J_USERNAME:}
+  password: ${NEO4J_PASSWORD:}
+  database: ${NEO4J_DATABASE:}
+  entity-vector-index: ${NEO4J_ENTITY_VECTOR_INDEX:}
+  relation-vector-index: ${NEO4J_RELATION_VECTOR_INDEX:}
+  query-limit: ${NEO4J_QUERY_LIMIT:200}
+redis:
+  host: ${REDIS_HOST:}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+  database: ${REDIS_DB:0}
+  key-prefix: ${REDIS_KEY_PREFIX:}
+  ttl-seconds: ${REDIS_TTL_SECONDS:0}
+  socket-timeout-seconds: ${REDIS_SOCKET_TIMEOUT_SECONDS:2}
+
+embedding:
+  base-url: ${EMBEDDING_BASE_URL:}
+  # The model and its output dimension are fixed in code; see
+  # EmbeddingGemmaClient.MODEL / EmbeddingGemmaClient.DIMENSION.
+  index-name: ${EMBEDDING_INDEX_NAME:}
+  # The local 8 GiB GPU cannot hold Qwen3-8B and EmbeddingGemma at once, so the
+  # first embedding after a chat phase may wait for a model swap. Keep this well
+  # above the observed worst case instead of aborting a whole run.
+  timeout-seconds: ${EMBEDDING_TIMEOUT_SECONDS:600}
+  # EmbeddingGemma is local and usually has much lower useful concurrency than
+  # the remote chat model. Override with EMBEDDING_MAX_CONCURRENCY if needed.
+  max-concurrency: ${EMBEDDING_MAX_CONCURRENCY:4}
+mysql:
+  host: ${MYSQL_HOST:}
+  port: ${MYSQL_PORT:3306}
+  user: ${MYSQL_USER:}
+  password: ${MYSQL_PASSWORD:}
+  database: ${MYSQL_DATABASE:}
+  connect-timeout-seconds: ${MYSQL_CONNECT_TIMEOUT_SECONDS:5}
+  # The default MyBatis pool is only 10 active connections, which becomes a
+  # hidden bottleneck when many graph workers persist progress concurrently.
+  pool-max-active: ${MYSQL_POOL_MAX_ACTIVE:32}
+  pool-max-idle: ${MYSQL_POOL_MAX_IDLE:8}
